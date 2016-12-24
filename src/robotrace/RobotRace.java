@@ -238,14 +238,32 @@ public class RobotRace extends Base {
      * and origin (yellow).
      */
     public void drawAxisFrame() {
-
+        gl.glPushMatrix();    
+            gl.glTranslated(0, 0, 1);
+            gl.glColor3f(255, 255, 0);
+            glut.glutSolidSphere(0.15, 6, 6);
+            gl.glColor3f(255, 0, 0);
+            gl.glRotated(90, 0, 1, 0);
+            drawArrow();
+            gl.glColor3f(0, 255, 0);
+            gl.glRotated(-90, 0, 1, 0);
+            gl.glRotated(-90, 1, 0, 0);
+            drawArrow();
+            gl.glColor3f(0, 0, 255);
+            gl.glRotated(90, 1, 0, 0);
+            drawArrow();
+        gl.glPopMatrix();
     }
     
     /**
      * Draws a single arrow
      */
     public void drawArrow() {  
-
+        gl.glPushMatrix();
+            glut.glutSolidCylinder(0.03, 0.8, 3, 5);
+            gl.glTranslated(0, 0, 0.8);
+            glut.glutSolidCone(0.1, 0.2, 5, 10);
+        gl.glPopMatrix();
     }
  
     /**
