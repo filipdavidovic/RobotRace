@@ -220,7 +220,7 @@ public class RobotRace extends Base {
         // Draw the (first) robot.
         gl.glUseProgram(robotShader.getProgramID()); 
         
-        robots[0].draw(gl, glu, glut, 0);
+        // robots[0].draw(gl, glu, glut, 0);
         
         
         // Draw the race track.
@@ -291,6 +291,8 @@ public class RobotRace extends Base {
             gl.glRotated(gs.sliderA * -90.0, 0, 1, 0);
             drawSecond();
         gl.glPopMatrix();
+        
+        // robots[0].draw(gl, glu, glut, PHI_MIN);
     }
     
     private void drawSecond() {

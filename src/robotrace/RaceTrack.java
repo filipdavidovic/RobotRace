@@ -27,6 +27,32 @@ abstract class RaceTrack {
      * Draws this track, based on the control points.
      */
     public void draw(GL2 gl, GLU glu, GLUT glut) {
+        double du = 1.0/50.0;
+        double u=0;
+        
+        gl.glFrontFace(GL_CW);
+        gl.glBegin(GL2.GL_QUAD_STRIP);
+        
+        Vector firstPoint = this.getPoint(u);
+        Vector firstTangent = this.getTangent(u);
+        Vector firstNormal = new Vector(firstTangent.y(), firstTangent.x(), 0);
+        firstNormal = firstNormal.normalized();
+        
+        gl.glVertex3f( (float) ( firstPoint.x() + ( firstNormal.x() * 2 * laneWidth ) ), (float) ( firstPoint.y() + ( firstNormal.y() * 2 * laneWidth ) ), 1.0f);
+        gl.glVertex3f( (float) ( firstPoint.x() - ( firstNormal.x() * 2 * laneWidth ) ), (float) ( firstPoint.y() - ( firstNormal.y() * 2 * laneWidth ) ), 1.0f);
+        
+        for(int i=1;i<51;i++) {
+            u = i*du;
+            Vector pointTemp = this.getPoint(u);
+            Vector tangentTemp = this.getTangent(u);
+            Vector normalTemp = new Vector(firstTangent.y(), firstTangent.x(), 0);
+            normalTemp = normalTemp.normalized();
+            
+            gl.glVertex3f( (float) ( pointTemp.x() + ( normalTemp.x() * 2 * laneWidth ) ), (float) ( pointTemp.y() + ( normalTemp.y() * 2 * laneWidth ) ), 1.0f);
+            gl.glVertex3f( (float) ( pointTemp.x() - ( normalTemp.x() * 2 * laneWidth ) ), (float) ( pointTemp.y() - ( normalTemp.y() * 2 * laneWidth ) ), 1.0f);
+        }
+        
+        gl.glEnd();
         
     }
     

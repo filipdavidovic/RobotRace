@@ -19,7 +19,12 @@ class Terrain {
      * Draws the terrain.
      */
     public void draw(GL2 gl, GLU glu, GLUT glut) {
-
+        float d = 1/100;
+        for(int i=0; i<100; i++) {
+            for(int j=0; j<100; j++) {
+                
+            }
+        }
     }
     
 }
