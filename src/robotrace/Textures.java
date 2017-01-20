@@ -13,12 +13,16 @@ public class Textures {
     public static Texture torso = null;
     public static Texture track = null;
     public static Texture brick = null;
+    public static Texture terrain = null;
+    public static Texture skybox = null;
         
     public static void loadTextures() {
         head = loadTexture("textures/head.jpg");
         torso = loadTexture("textures/torso.jpg");
         track = loadTexture("textures/track.jpg");
         brick = loadTexture("textures/brick.jpg");
+        terrain = loadTexture("textures/landscape.jpg");
+        skybox = loadTexture("textures/skybox2.jpg");
     }
     
     /**
@@ -29,7 +33,6 @@ public class Textures {
         Texture result = null;
 
         try {
-            // Try to load from local folder.
             result = TextureIO.newTexture(Textures.class.getResource(file), false, null);
         } catch(Exception e1) {
             e1.printStackTrace();

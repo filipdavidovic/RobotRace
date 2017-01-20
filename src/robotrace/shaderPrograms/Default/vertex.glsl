@@ -1,4 +1,4 @@
-// simple vertex shader
+// default vertex shader
 
 void main()
 {

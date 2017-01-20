@@ -1,3 +1,4 @@
+// default fragment shader
 
 void main()
 {

@@ -1,8 +1,10 @@
 package robotrace;
 
+import java.io.IOException;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 import static javax.media.opengl.GL2.*;
 import static robotrace.ShaderPrograms.*;
-import static robotrace.Textures.*;
 
 /**
  * Handles all of the RobotRace graphics functionality,
@@ -71,6 +73,7 @@ public class RobotRace extends Base {
     /** Instance of the terrain. */
     private final Terrain terrain;
         
+    private Vector[] startingPositions;
     /**
      * Constructs this robot race by initializing robots,
      * camera, track, and terrain.
@@ -81,24 +84,16 @@ public class RobotRace extends Base {
         robots = new Robot[4];
         
         // Initialize robot 0
-        robots[0] = new Robot(Material.GOLD
-                
-        );
+        robots[0] = new Robot(Material.GOLD, -1.5f, 0.004f);
         
         // Initialize robot 1
-        robots[1] = new Robot(Material.SILVER
-              
-        );
+        robots[1] = new Robot(Material.SILVER, -0.5f, 0.003f);
         
         // Initialize robot 2
-        robots[2] = new Robot(Material.WOOD
-              
-        );
+        robots[2] = new Robot(Material.WOOD, 0.5f, 0.001f);
 
         // Initialize robot 3
-        robots[3] = new Robot(Material.ORANGE
-                
-        );
+        robots[3] = new Robot(Material.ORANGE, 1.5f, 0.002f);
         
         // Initialize the camera
         camera = new Camera();
@@ -112,8 +107,33 @@ public class RobotRace extends Base {
         // Track 2
         float g = 3.5f;
         raceTracks[1] = new BezierTrack(
-                
-            new Vector[] {}
+            new Vector[] {
+                new Vector(4, -11, 1),
+                new Vector(20 / 3, -11, 1),
+                new Vector(28 / 3, -11, 1),
+                new Vector(12, -11, 1),
+                new Vector(13, -11, 1),
+                new Vector(13, -12, 1),
+                new Vector(12, -12, 1),
+                new Vector(8, -12, 1),
+                new Vector(4, -12, 1),
+                new Vector(-9, -12, 1),
+                new Vector(-13, -12, 1),
+                new Vector(-13, -12, 1),
+                new Vector(-13, 1, 1),
+                new Vector(-13, 5, 1),
+                new Vector(-13, 9, 1),
+                new Vector(-13, 13, 1),
+                new Vector(-13, 14, 1),
+                new Vector(-12, 14, 1),
+                new Vector(-12, 13, 1),
+                new Vector(-12, 10, 1),
+                new Vector(-12, 8, 1),
+                new Vector(-12, 5, 1),
+                new Vector(-12, -11, 1),
+                new Vector(-12, -11, 1),
+                new Vector(4, -11, 1)
+            }
        
         );
         
@@ -140,8 +160,16 @@ public class RobotRace extends Base {
         // gl.glCullFace(GL_BACK);
         // gl.glEnable(GL_CULL_FACE);
         
-	    // Normalize normals.
+	// Normalize normals.
         gl.glEnable(GL_NORMALIZE);
+        
+        // Converts colors to materials when lighting is enabled.
+        gl.glEnable(GL_COLOR_MATERIAL);
+        // gl.glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+
+        // Enable textures. 
+        gl.glEnable(GL_TEXTURE_2D);
+        gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
         
 	// Try to load four textures, add more if you like in the Textures class         
         Textures.loadTextures();
@@ -150,7 +178,6 @@ public class RobotRace extends Base {
         // Try to load and set up shader programs
         ShaderPrograms.setupShaders(gl, glu);
         reportError("shaderProgram");
-        
     }
    
     /**
@@ -172,12 +199,24 @@ public class RobotRace extends Base {
         gl.glMatrixMode(GL_MODELVIEW);
         gl.glLoadIdentity();
         
-        // Add light source
-        gl.glLightfv(GL_LIGHT0, GL_POSITION, new float[]{0f,0f,0f,1f}, 0);
-               
+        gl.glEnable(GL_LIGHTING);
+        // Set basic light properties of light 0
+        final float[] AMBIENT = {0.1f, 0.1f, 0.1f, 1.0f};
+        final float[] DIFFUSE = {1.0f, 1.0f, 1.0f, 1.0f};
+        final float[] SPECULAR = {1.0f, 1.0f, 1.0f, 1.0f};
+        // By positioning the light, relative to origin on the initial MODELVIEW matrix,
+        // before the camera is positioned, the light will is positioned relative to the camera.
+        // The positional light is set slightly to the left and slightly up (relative to the camera).
+        final float[] POSITION = {-0.5f, 0.0f, 0.5f, 1.0f};
+
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_AMBIENT, AMBIENT, 0);
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, DIFFUSE, 0);
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_SPECULAR, SPECULAR, 0);
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, POSITION, 0);
+        
         // Update the view according to the camera mode and robot of interest.
         // For camera modes 1 to 4, determine which robot to focus on.
-        camera.update(gs, robots[0]);
+        camera.update(gs, robots, raceTracks[gs.trackNr]);
         glu.gluLookAt(camera.eye.x(),    camera.eye.y(),    camera.eye.z(),
                       camera.center.x(), camera.center.y(), camera.center.z(),
                       camera.up.x(),     camera.up.y(),     camera.up.z());
@@ -192,47 +231,152 @@ public class RobotRace extends Base {
     public void drawScene() {
         
         gl.glUseProgram(defaultShader.getProgramID());
-        reportError("program");
+        reportError("program:");
         
         // Background color.
-        gl.glClearColor(1f, 1f, 1f, 0f);
+        gl.glClearColor(1.0f, 1.0f, 1.0f, 0f);
         
         // Clear background.
         gl.glClear(GL_COLOR_BUFFER_BIT);
         
         // Clear depth buffer.
         gl.glClear(GL_DEPTH_BUFFER_BIT);
-        
+
         // Set color to black.
         gl.glColor3f(0f, 0f, 0f);
         
         gl.glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         
-
-    // Draw hierarchy example.
-        drawHierarchy();
+        // this.startingPositions = raceTracks[0].getStartingPositions();
+        int i = 0;
+        //for(Robot robot : robots) {
+        //    robot.setPosition(startingPositions[i]);
+        //    i++;
+        //}
         
         // Draw the axis frame.
         if (gs.showAxes) {
             drawAxisFrame();
         }
         
-        // Draw the (first) robot.
-        gl.glUseProgram(robotShader.getProgramID()); 
+        gl.glDepthMask(false);
         
-        // robots[0].draw(gl, glu, glut, 0);
+        gl.glUseProgram(skyboxShader.getProgramID());
+        reportError("skybox:");
+        drawSkybox();
         
+        gl.glDepthMask(true);
         
         // Draw the race track.
         gl.glUseProgram(trackShader.getProgramID());
         raceTracks[gs.trackNr].draw(gl, glu, glut);
+        reportError("track:");
+        
+        // Draw the (first) robot.
+        gl.glUseProgram(robotShader.getProgramID()); 
+        for(Robot robot : robots) {
+            robot.draw(gl, glu, glut, gs.tAnim);
+            Vector newPosition = raceTracks[gs.trackNr].getPoint(robot.getPosition());
+            Vector newDirection = raceTracks[gs.trackNr].getTangent(robot.getPosition());
+            robot.setPosition(newPosition);
+            robot.setDirection(newDirection);
+            robot.updatePosition();
+        }
+        reportError("robot:");
         
         // Draw the terrain.
         gl.glUseProgram(terrainShader.getProgramID());
         terrain.draw(gl, glu, glut);
         reportError("terrain:");
+    }
+    
+    public void drawSkybox() {
+        final float D = 100.0f;
         
+        // float eyeX = gs.vDist * ( (float) cos(gs.theta) ) * ( (float) cos(gs.phi) ) + (float) gs.cnt.x();
+        // float eyeY = gs.vDist * ( (float) sin(gs.theta) ) * ( (float) cos(gs.phi) ) + (float) gs.cnt.y();
+        // float eyeZ = gs.vDist * ( (float) sin(gs.phi) ) + (float) gs.cnt.z();
         
+        float eyeX = 0;
+        float eyeY = 0;
+        float eyeZ = 0;
+        
+        // gl.glPushMatrix();
+        
+        // gl.glTranslated(eyeX, eyeY, eyeZ);
+                
+        Textures.skybox.enable(gl);
+        Textures.skybox.bind(gl);
+        
+        gl.glBegin(gl.GL_QUADS);
+        
+        // left side
+        gl.glTexCoord2f(0.0f, 1.0f/3.0f);
+        gl.glVertex3f(-D + eyeX, D + eyeY, D + eyeZ);
+        gl.glTexCoord2f(0.0f, 2.0f/3.0f);
+        gl.glVertex3f(-D + eyeX, -D + eyeY, D + eyeZ);
+        gl.glTexCoord2f(0.25f, 2.0f/3.0f);
+        gl.glVertex3f(-D + eyeX, -D + eyeY, -D + eyeZ);
+        gl.glTexCoord2f(0.25f, 1.0f/3.0f);
+        gl.glVertex3f(-D + eyeX, D + eyeY, -D + eyeZ);
+        
+        // front side
+        gl.glTexCoord2f(0.25f, 1.0f/3.0f);
+        gl.glVertex3f(-D + eyeX, D + eyeY, -D + eyeZ);
+        gl.glTexCoord2f(0.25f, 2.0f/3.0f);
+        gl.glVertex3f(-D + eyeX, -D + eyeY, -D + eyeZ);
+        gl.glTexCoord2f(0.5f, 2.0f/3.0f);
+        gl.glVertex3f(D + eyeX, -D + eyeY, -D + eyeZ);
+        gl.glTexCoord2f(0.5f, 1.0f/3.0f);
+        gl.glVertex3f(D + eyeX, D + eyeY, -D + eyeZ);
+        
+        // right side
+        gl.glTexCoord2f(0.5f, 1.0f/3.0f);
+        gl.glVertex3f(D + eyeX, D + eyeY, D + eyeZ);
+        gl.glTexCoord2f(0.5f, 2.0f/3.0f);
+        gl.glVertex3f(D + eyeX, -D + eyeY, D + eyeZ);
+        gl.glTexCoord2f(0.75f, 2.0f/3.0f);
+        gl.glVertex3f(D + eyeX, -D + eyeY, -D + eyeZ);
+        gl.glTexCoord2f(0.75f, 1.0f/3.0f);
+        gl.glVertex3f(D + eyeX, D + eyeY, -D + eyeZ);
+        
+        // back side
+        gl.glTexCoord2f(0.75f, 1.0f/3.0f);
+        gl.glVertex3f(-D + eyeX, D + eyeY, D + eyeZ);
+        gl.glTexCoord2f(0.75f, 2.0f/3.0f);
+        gl.glVertex3f(-D + eyeX, -D + eyeY, D + eyeZ);
+        gl.glTexCoord2f(1.0f, 2.0f/3.0f);
+        gl.glVertex3f(D + eyeX, -D + eyeY, D + eyeZ);
+        gl.glTexCoord2f(1.0f, 1.0f/3.0f);
+        gl.glVertex3f(D + eyeX, D + eyeY, D + eyeZ);
+        
+        // top side
+        gl.glTexCoord2f(0.25f, 0.0f);
+        gl.glVertex3f(-D + eyeX, D + eyeY, D + eyeZ);
+        gl.glTexCoord2f(0.5f, 0.0f);
+        gl.glVertex3f(D + eyeX, D + eyeY, D + eyeZ);
+        gl.glTexCoord2f(0.5f, 1.0f/3.0f);
+        gl.glVertex3f(D + eyeX, D + eyeY, -D + eyeZ);
+        gl.glTexCoord2f(0.25f, 1.0f/3.0f);
+        gl.glVertex3f(-D + eyeX, D + eyeY, -D + eyeZ);
+        
+        // bottom side
+        gl.glTexCoord2f(0.25f, 2.0f/3.0f);
+        gl.glVertex3f(-D + eyeX, -D + eyeY, D + eyeZ);
+        gl.glTexCoord2f(0.5f, 2.0f/3.0f);
+        gl.glVertex3f(D + eyeX, -D + eyeY, D + eyeZ);
+        gl.glTexCoord2f(0.5f, 1.0f);
+        gl.glVertex3f(D + eyeX, -D + eyeY, -D + eyeZ);
+        gl.glTexCoord2f(0.25f, 1.0f);
+        gl.glVertex3f(-D + eyeX, -D + eyeY, -D + eyeZ);
+        
+        gl.glEnd();
+        
+        Textures.skybox.disable(gl);
+        
+        // gl.glTranslated(-eyeX, -eyeY, -eyeZ);
+        
+        // gl.glPopMatrix();
     }
     
     /**
@@ -281,36 +425,6 @@ public class RobotRace extends Base {
      * 
      * {@link #drawHierarchy()} -> {@link #drawSecond()} -> {@link #drawThird()}
      */
-    private void drawHierarchy() {
-        gl.glColor3d(gs.sliderC, gs.sliderD, gs.sliderE);
-        gl.glPushMatrix(); 
-            gl.glScaled(2, 1, 1);
-            glut.glutSolidCube(1);
-            gl.glScaled(0.5, 1, 1);
-            gl.glTranslated(1, 0, 0);
-            gl.glRotated(gs.sliderA * -90.0, 0, 1, 0);
-            drawSecond();
-        gl.glPopMatrix();
-        
-        // robots[0].draw(gl, glu, glut, PHI_MIN);
-    }
-    
-    private void drawSecond() {
-        gl.glTranslated(1, 0, 0);
-        gl.glScaled(2, 1, 1);
-        glut.glutSolidCube(1);
-        gl.glScaled(0.5, 1, 1);
-        gl.glTranslated(1, 0, 0);
-        gl.glRotated(gs.sliderB * -90.0, 0, 1, 0);
-        drawThird();
-    }
-    
-    private void drawThird() {
-        gl.glTranslated(1, 0, 0);
-        gl.glScaled(2, 1, 1);
-        glut.glutSolidCube(1);
-    }
-    
     
     /**
      * Main program execution body, delegates to an instance of

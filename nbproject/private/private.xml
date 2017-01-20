@@ -4,12 +4,17 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/home/ficabj5/data/School/2nd%20Quartile/Computer%20Graphics/Homework%20Assingments/Assignment%202%20-%20Robot%20Race/RobotRace/src/robotrace/ParametricTrack.java</file>
+            <file>file:/home/ficabj5/data/School/2nd%20Quartile/Computer%20Graphics/Homework%20Assingments/Assignment%202%20-%20Robot%20Race/RobotRace/src/robotrace/Textures.java</file>
+            <file>file:/home/ficabj5/data/School/2nd%20Quartile/Computer%20Graphics/Homework%20Assingments/Assignment%202%20-%20Robot%20Race/RobotRace/src/robotrace/Material.java</file>
             <file>file:/home/ficabj5/data/School/2nd%20Quartile/Computer%20Graphics/Homework%20Assingments/Assignment%202%20-%20Robot%20Race/RobotRace/src/robotrace/RaceTrack.java</file>
+            <file>file:/home/ficabj5/data/School/2nd%20Quartile/Computer%20Graphics/Homework%20Assingments/Assignment%202%20-%20Robot%20Race/RobotRace/src/robotrace/Tree.java</file>
             <file>file:/home/ficabj5/data/School/2nd%20Quartile/Computer%20Graphics/Homework%20Assingments/Assignment%202%20-%20Robot%20Race/RobotRace/src/robotrace/Camera.java</file>
+            <file>file:/home/ficabj5/data/School/2nd%20Quartile/Computer%20Graphics/Homework%20Assingments/Assignment%202%20-%20Robot%20Race/RobotRace/src/robotrace/BezierTrack.java</file>
             <file>file:/home/ficabj5/data/School/2nd%20Quartile/Computer%20Graphics/Homework%20Assingments/Assignment%202%20-%20Robot%20Race/RobotRace/src/robotrace/Robot.java</file>
+            <file>file:/home/ficabj5/data/School/2nd%20Quartile/Computer%20Graphics/Homework%20Assingments/Assignment%202%20-%20Robot%20Race/RobotRace/src/robotrace/ShaderPrograms.java</file>
             <file>jar:file:/home/ficabj5/data/School/2nd%20Quartile/Computer%20Graphics/Homework%20Assingments/Assignment%202%20-%20Robot%20Race/RobotRace/lib/RobotRaceLibrary.jar!/robotrace/Vector.java</file>
-            <file>jar:file:/home/ficabj5/data/School/2nd%20Quartile/Computer%20Graphics/Homework%20Assingments/Assignment%202%20-%20Robot%20Race/RobotRace/lib/RobotRaceLibrary.jar!/robotrace/GlobalState.java</file>
             <file>file:/home/ficabj5/data/School/2nd%20Quartile/Computer%20Graphics/Homework%20Assingments/Assignment%202%20-%20Robot%20Race/RobotRace/src/robotrace/RobotRace.java</file>
+            <file>file:/home/ficabj5/data/School/2nd%20Quartile/Computer%20Graphics/Homework%20Assingments/Assignment%202%20-%20Robot%20Race/RobotRace/src/robotrace/Terrain.java</file>
         </group>
     </open-files>
 </project-private>
